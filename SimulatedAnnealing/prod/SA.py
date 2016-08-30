@@ -4,11 +4,9 @@ Created on Aug 29, 2016
 @author: XING WANG    
 '''
 
-import SimulatedAnnealing.prod.SA as SA
-
 import numpy as np
 
-class QAP(object):
+class SA(object):
     '''
     Soving a Quadratic Assignment Problem of Department Locations, 
     by minimizing the total transportation through all departments.
@@ -27,7 +25,8 @@ class QAP(object):
         self.alpha = alpha
         
     def moveOperator(self, xOld):
-        return np.random.shuffle(xOld)
+        return None
+    
     
     def getCost(self, x):
         return None
