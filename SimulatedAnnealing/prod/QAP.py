@@ -1,6 +1,5 @@
 '''
 Created on Aug 29, 2016
-
 @author: XING WANG    
 '''
 
@@ -30,16 +29,18 @@ class QAP(object):
     FLOW_MATRIX[14, 2] = 5; FLOW_MATRIX[14, 4] = 5; FLOW_MATRIX[14, 5] = 10; FLOW_MATRIX[14, 8] = 2; FLOW_MATRIX[14, 9] = 5; FLOW_MATRIX[14, 12] = 2; FLOW_MATRIX[14, 13] = 4; 
 
 
-    def __init__(self, T0, m, n, alpha = 0.9, seed = 123456789):
+    def __init__(self, T0, n, alpha = 0.9, Tf = 1e-10, seed = 123456789):
         '''
         Constructor
         '''
         np.random.seed(seed)
         self.X0 = np.random.permutation(len(QAP.FLOW_MATRIX))
         self.T0 = T0
-        self.m = m
+        #self.m = m
         self.n = n
         self.alpha = alpha
+        self.Tf = Tf
+        self.seed = seed
 
     def computeDistance(self, i, j):
         ''' i, j are location indices '''
@@ -76,10 +77,6 @@ class QAP(object):
             Y[j] = temp
         return Y
     
-#     def moveOperator(self, X):
-#         Y = np.copy(X)
-#         return np.random.permutation(Y)
-    
     def simulatedAnnealing(self):
         xOld = self.X0
         costOld = self.computeTotalCost(xOld)
@@ -87,7 +84,8 @@ class QAP(object):
         print "Initial Total Cost: ", costOld
         temperature = self.T0
         timesWithoutImprovement = 0
-        for t in np.arange(self.m - 1):
+        #for t in np.arange(self.m - 1):
+        while (temperature >= self.Tf):
             for i in range(self.n - 1):
                 xNew = self.moveOperator(xOld)
                 #print xNew
@@ -104,20 +102,31 @@ class QAP(object):
                         xOld = np.copy(xNew)
                         costOld = costNew
                 #print xOld
-                #if (timesWithoutImprovement >= 1e5):
-                #    return xOld
+                if (timesWithoutImprovement >= 1000):
+                    print "zzzzz"
+                    return xOld
                 #print "Total Cost: ", costOld
             temperature = self.alpha * temperature
-            if (temperature <= 1e-10):
-                break
         return xOld
 
-    
-solveQAP = QAP(T0 = 100, m = 500, n = 500, alpha = 0.9, seed = 1)
-print "T0 =", solveQAP.T0, ", m =", solveQAP.m, ", n =", solveQAP.n, ", alpha =", solveQAP.alpha, ", seed ="
-startTime = time.clock()
-res = solveQAP.simulatedAnnealing()  
-print "Best Result Found: ", res+1
-print "Minimum Total Cost Found: ", solveQAP.computeTotalCost(res)
-endTime = time.clock()
-print "Elapsed Time: ", endTime - startTime
+TfList = [10, .1, 1e-10]
+alphaList = [.5, .9, .99]
+seedList = [12, 123456789, 0, 1, 3]
+
+#f = open("results.txt", "w+")
+for Tf_i in TfList:
+    print "############################################################"
+    for alpha_i in alphaList:
+        print "========================================================"                
+        for seed_i in seedList:
+            print "----------------------------------------------------"        
+            #solveQAP = QAP(T0 = 100, Tf = 10, n = 500, alpha = 0.9, seed = 12)
+            solveQAP = QAP(T0 = 100, Tf = Tf_i, n = 500, alpha = alpha_i, seed = seed_i)
+            print "T0 =", solveQAP.T0, ", Tf =", solveQAP.Tf, ", n =", solveQAP.n, ", alpha =", solveQAP.alpha, ", seed = ", solveQAP.seed
+            startTime = time.clock()
+            res = solveQAP.simulatedAnnealing()  
+            print "Best Result Found: ", res+1
+            print "Minimum Total Cost Found: ", solveQAP.computeTotalCost(res)
+            endTime = time.clock()
+            print "Elapsed Time: ", endTime - startTime            
+#f.close()
