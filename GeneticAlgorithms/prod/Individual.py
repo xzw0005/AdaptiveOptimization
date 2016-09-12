@@ -31,11 +31,16 @@ class Individual(object):
             self.cost = self.computeTotalCost(chromosome)
             self.fitness = self.getFitness(self.cost)
         else:
+            self.chromosome = None
+            self.cost = None
+            self.fitness = None
         
-    #def randomIndividual(self):
-            self.chromosome = np.random.permutation(Individual.N)
-            self.cost = self.computeTotalCost(self.chromosome)
-            self.fitness = self.getFitness(self.cost)
+    def randomIndividual(self, seed = None):
+        if seed is not None:
+            np.random.seed(seed)
+        self.chromosome = np.random.permutation(Individual.N)
+        self.cost = self.computeTotalCost(self.chromosome)
+        self.fitness = self.getFitness(self.cost)
 
     def computeDistance(self, i, j):
         ''' i, j are location indices '''
@@ -89,6 +94,7 @@ class Individual(object):
             for i in np.arange(Individual.N):
                 if (i not in child):
                     leftover.append(i)
+            #print len(emptyPosition), len(leftover)
             assert len(emptyPosition) == len(leftover)
             repairOrder = np.random.permutation(len(leftover))
             for i in np.arange(len(emptyPosition)):
