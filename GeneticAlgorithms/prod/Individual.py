@@ -137,7 +137,8 @@ class Individual(object):
 #         string += "]"
 #         return string
 
-# 
+#print Individual().randomIndividual()
+
 # p1 = np.random.permutation(15)
 # p2 = np.random.permutation(15)
 # print p1,"\n", p2

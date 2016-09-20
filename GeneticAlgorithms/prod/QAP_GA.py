@@ -38,7 +38,7 @@ class QAP_GA(object):
         self.probCrossover = probCrossover
         self.probMutation = probMutation
         self.maxGeneration = maxGeneration
-        self.generation = 0
+        self.maxiter = 0
 
     def sortPopulation(self, population):
         population.sort(key = lambda x: x.cost)
@@ -110,27 +110,31 @@ class QAP_GA(object):
             generation += 1
         return self.population[0]
                 
-            
+
+init10 = TenInitialPopulations.TenInitialPopulations().init10
+initPop = init10[0][0:10]
+solveQAP = QAP_GA(probCrossover=.6, probMutation=.3, populationSize=10, maxGeneration=2, initPopulation=initPop)    
+print solveQAP.population
 #===============================================================================
-if __name__ == '__main__':
-    init10 = TenInitialPopulations.TenInitialPopulations().init10
-    psList = [50, 500, 2000]
-    pmList = [.001, .5, .99]
-    gmList = [20, 200, 1000]
-    for ps in psList:
-        print "############################################################"
-        for i in np.arange(len(init10)):
-            print "********************************************************"
-            initPop = init10[i][0:ps]
-            for gm in gmList:
-                print "====================================================" 
-                for pm in pmList:
-                    print "------------------------------------------------"  
-                    print "PopulationSize =", ps, ", Maximum Generation =", gm, ", Matation Probability =", pm, ", Initial Population Choice #", i+1
-                    solveQAP = QAP_GA(probCrossover=.6, probMutation=pm, populationSize=ps, maxGeneration=100, initPopulation=initPop)
-                    startTime = time.clock()
-                    res = solveQAP.geneticAlgorithm()
-                    print "Best Result Found: ", res.chromosome + 1
-                    print "Minimum Total Cost Found: ", res.cost
-                    endTime = time.clock()
-                    print "Elapsed Time: ", endTime - startTime 
+# if __name__ == '__main__':
+#     init10 = TenInitialPopulations.TenInitialPopulations().init10
+#     psList = [50, 500, 2000]
+#     pmList = [.001, .5, .99]
+#     gmList = [20, 200, 1000]
+#     for ps in psList:
+#         print "############################################################"
+#         for i in np.arange(len(init10)):
+#             print "********************************************************"
+#             initPop = init10[i][0:ps]
+#             for gm in gmList:
+#                 print "====================================================" 
+#                 for pm in pmList:
+#                     print "------------------------------------------------"  
+#                     print "PopulationSize =", ps, ", Maximum Generation =", gm, ", Matation Probability =", pm, ", Initial Population Choice #", i+1
+#                     solveQAP = QAP_GA(probCrossover=.6, probMutation=pm, populationSize=ps, maxGeneration=100, initPopulation=initPop)
+#                     startTime = time.clock()
+#                     res = solveQAP.geneticAlgorithm()
+#                     print "Best Result Found: ", res.chromosome + 1
+#                     print "Minimum Total Cost Found: ", res.cost
+#                     endTime = time.clock()
+#                     print "Elapsed Time: ", endTime - startTime 
