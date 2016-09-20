@@ -6,7 +6,7 @@ Created on Sep 20, 2016
 import numpy as np
 from EvolutionaryStrategies.prod.AckleyFunction import ackley
 import abc
-from EvolutionaryStrategies.test.Individual import BaseIndividual as Individual
+from EvolutionaryStrategies.sandbox.Individual import BaseIndividual as Individual
 
 
 class EvolutionStrategy(object):
