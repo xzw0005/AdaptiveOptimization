@@ -6,8 +6,6 @@ import math
 import numpy as np
 # import collections
 # from timeit import itertools
-from EvolutionaryStrategies.prod.AckleyFunction import ackley as ak
-
 
 class Individual(object):
     
@@ -18,7 +16,7 @@ class Individual(object):
         self.gen = gen
         if (xx is not None):
             self.xx = xx
-            self.fval = ak(xx=xx)
+            self.fval = self.ackley(xx=xx)
             if (sigma is None):
                 self.sigma = np.zeros(len(xx)) + 1
             else:
@@ -37,7 +35,6 @@ class Individual(object):
             higher = bounds[i][1]
             x = np.random.random() * (higher - lower) + lower
             xx.append(x)
-        #print np.array(xx)
         self.xx = np.array(xx)
         self.fval = self.ackley(xx)
         self.sigma = np.zeros(len(xx)) + 1
@@ -57,7 +54,6 @@ class Individual(object):
 #         xx = xx + noise
 
         child = Individual(gen, xx, sigma)
-        #child.fval = ackley(xx)
         return child
     
     def ackley(self, xx, a = 20.0, b = 0.2, c = 2 * math.pi):
@@ -76,7 +72,7 @@ class Individual(object):
         return self.fval, has_fval
 
     def __repr__(self):
-        return self.xx.__repr__()+ ', %.3f' %self.fval + ',%.3f' %ak(self.xx)+ '\n' #+ " with Ackley Value: " + '%.5f' %self.fval +"~~"+ str(ackley(self.xx))
+        return self.xx.__repr__() # + ', %.3f' %self.fval + ',%.3f' %ak(self.xx)+ '\n' #+ " with Ackley Value: " + '%.5f' %self.fval +"~~"+ str(ackley(self.xx))
 
 
 # class Bounds(object):
