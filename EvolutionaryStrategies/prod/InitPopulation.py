@@ -25,20 +25,20 @@ class InitPopulation(object):
         self.__scale_arg1 = 0.5 * (self.limits[0] + self.limits[1])
         self.__scale_arg2 = abs(self.limits[0] - self.limits[1])    
         
-        xx_mat = self.initPopLhs()    
+        xx_mat = self.init_pop_lhs()    
         self.population = []
         for xx in xx_mat:
             ind = Individual.Individual(0, xx)
             self.population.append(ind)
      
-    def initPopRandom(self):
+    def init_pop_random(self):
         rng = self.random_number_generator      # rng is a container with seed, e.g., rng.random_sample() is just as np.random.seed(); np.random.random_sample()        
         #self.population = rng.random_sample(self.popshape)
         sample = rng.random_sample(self.popshape)
         xx_mat = self.__scale_arg1 + (sample - 0.5) * self.__scale_arg2 
         return xx_mat
         
-    def initPopLhs(self):
+    def init_pop_lhs(self):
         """
         Initialize the population with Latin Hypercube Sampling
         LHS ensures that each parameter is uniformly sampled over its range
@@ -78,6 +78,6 @@ class InitPopulation(object):
         raise ValueError('%r cannot be used to seed a numpy.random.RandomState instance' % seed)
     
 # popu = InitPopulation(1, 20)
-# popu.initPopLhs()
+# popu.init_pop_lhs()
 # print popu.population
 # print popu.popshape

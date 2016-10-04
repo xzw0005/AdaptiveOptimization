@@ -6,7 +6,7 @@ Created on Aug 29, 2016
 import numpy as np
 import time
 
-class QAP(object):
+class QAP15(object):
     '''
     Soving a Quadratic Assignment Problem of Department Locations, 
     by minimizing the total transportation through all departments.
@@ -34,7 +34,7 @@ class QAP(object):
         Constructor
         '''
         np.random.seed(seed)
-        self.X0 = np.random.permutation(len(QAP.FLOW_MATRIX))
+        self.X0 = np.random.permutation(len(QAP15.FLOW_MATRIX))
         self.T0 = T0
         #self.m = m
         self.n = n
@@ -55,13 +55,13 @@ class QAP(object):
         dept2 = X[j]
         if (dept1 < dept2):
             temp = dept1; dept1 = dept2; dept2 = temp;
-        flow = QAP.FLOW_MATRIX[dept1, dept2]
+        flow = QAP15.FLOW_MATRIX[dept1, dept2]
         return flow * distance
     
     def computeTotalCost(self, X):
         #assert X is np.ndarray
         totalCost = 0
-        for loc1 in np.arange(1, len(QAP.FLOW_MATRIX)):
+        for loc1 in np.arange(1, len(QAP15.FLOW_MATRIX)):
             for loc2 in np.arange(loc1):
                 totalCost = totalCost + self.costBetweenTwoDepartments(X, loc1, loc2)
         return totalCost
@@ -70,7 +70,7 @@ class QAP(object):
         Y= np.copy(X)
         n = np.random.poisson(1, 1)[0] + 1
         for k in np.arange(n):
-            locPairs = np.random.choice(len(QAP.FLOW_MATRIX), 2, replace=False)
+            locPairs = np.random.choice(len(QAP15.FLOW_MATRIX), 2, replace=False)
             i = locPairs[0]; j = locPairs[1];
             temp = Y[i]
             Y[i] = Y[j]
@@ -120,8 +120,8 @@ for Tf_i in TfList:
         print "========================================================"                
         for seed_i in seedList:
             print "----------------------------------------------------"        
-            #solveQAP = QAP(T0 = 100, Tf = 10, n = 500, alpha = 0.9, seed = 12)
-            solveQAP = QAP(T0 = 100, Tf = Tf_i, n = 500, alpha = alpha_i, seed = seed_i)
+            #solveQAP = QAP15(T0 = 100, Tf = 10, n = 500, alpha = 0.9, seed = 12)
+            solveQAP = QAP15(T0 = 100, Tf = Tf_i, n = 500, alpha = alpha_i, seed = seed_i)
             print "T0 =", solveQAP.T0, ", Tf =", solveQAP.Tf, ", n =", solveQAP.n, ", alpha =", solveQAP.alpha, ", seed = ", solveQAP.seed
             startTime = time.clock()
             res = solveQAP.simulatedAnnealing()  
