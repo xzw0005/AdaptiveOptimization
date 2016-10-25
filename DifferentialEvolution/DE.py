@@ -19,7 +19,7 @@ class DifferentialEvolutionOptimizer(object):
 
 
     def __init__(self, popsize=50, f=0.5, cr=0.8, x='rand', y=1, z='bin', seed = 123,
-                 maxiter = 1e2, tol=1e-5, bounds = [(-32, 32), (-32, 32)]):
+                 maxiter = 1e2, tol=1e-5, bounds = [(-5, 5), (-5, 5)]):
         '''
         Constructor
         '''
@@ -161,13 +161,13 @@ for i in range(len(ten_seeds)):
         #print rec[0], rec[2]
     mins.append(records[-1][3])
     plt.plot(x, y, c=colors[i])
-plt.xlim((0, 80))
+plt.xlim((0, 50))
 #print mins
 plt.ylim((0, 5)) 
-plt.xlabel("Generation")
+plt.xlabel("Iteration")
 plt.ylabel("Minimum Ackley Function Value") 
-plt.title("Minimum Value in Each Generation, F=%.1f, CR=%.1f, %s/%d/%s" % (F, CR, X, Y, Z) )#, #Comma Strategy") 
-plt.savefig('F%dCR%d%s%d%s.png'%(F*10, CR*10, X, Y, Z)) 
+plt.title("Minimum Value in Each Iteration")#, F=%.1f, CR=%.1f, %s/%d/%s" % (F, CR, X, Y, Z) )#, #Comma Strategy") 
+#plt.savefig('F%dCR%d%s%d%s.png'%(F*10, CR*10, X, Y, Z)) 
 plt.show()
 fh.close()
 f2.close()
