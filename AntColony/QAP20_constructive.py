@@ -39,7 +39,6 @@ ff.close()
 flow_matrix = np.array(flow_matrix)
 N = len(flow_matrix)
 #print flow_matrix.shape
-Q = 1.
 
 def costBetweenTwoDepartments(sol, i, j):
     ''' i, j are location indices '''
@@ -65,7 +64,7 @@ def trailHeuristic(distance_matrix, flow_matrix):
     coupling_matrix = np.outer(distance_potentials_vector, flow_potentials_vector)
     return 1.0/coupling_matrix
 
-def initializeQAP(num_ants, seed=None):
+def initializeQAP(num_ants, tau0=1., seed=None):
     if seed is None:
         rng = np.random.mtrand._rand
     elif isinstance(seed, (numbers.Integral, np.integer)):
@@ -78,7 +77,7 @@ def initializeQAP(num_ants, seed=None):
         ant = Ant(sol)
         colony.append(ant)
     colony.sort(key = lambda ant: ant.fval)     # sort the ants by their cost from lowest to highest
-    tau0 = 1e2 / (Q * colony[0].fval)
+    tau0 = tau0 / colony[0].fval
     pheromone_matrix = np.ones((N, N)) * tau0
     #print pheromone_matrix
     return colony, pheromone_matrix
@@ -87,7 +86,6 @@ def constructSolution(pheromone_matrix, heuristic_matrix, alpha, beta, q0):
     N = len(heuristic_matrix)
     unassigned = np.random.permutation(N)
     unassigned = [i for i in unassigned]
-    #sol = np.zeros(N)
     sol=[]
     #order = np.random.permutation(N)
     #for i in order:
@@ -109,7 +107,6 @@ def constructSolution(pheromone_matrix, heuristic_matrix, alpha, beta, q0):
         k = unassigned[idx]
         sol.append(k)
         unassigned.remove(k)
-    #print sol
     return sol
 
 
@@ -128,26 +125,34 @@ class Ant(object):
         for i in range(N):
             j = sol[i]
             # (i, j) is the location-department pair
-            delta_pheromone[(i, j)] = 1. / (Q * fval)
+            delta_pheromone[(i, j)] = 1. / fval
         return delta_pheromone
 
 def renew_ant(pheromone_matrix, heuristic_matrix, alpha, beta, q0):
     sol = constructSolution(pheromone_matrix, heuristic_matrix, alpha, beta, q0)
     return Ant(sol)
 
-def updatePheromoneByAnt(pheromone_matrix, ant, rho):
+def updatePheromoneByAnt(pheromone_matrix, ant):
     for key in ant.delta_pheromone:
         i, j = key
-        pheromone_matrix[i][j] += rho * ant.delta_pheromone[i, j]
+        pheromone_matrix[i][j] += ant.delta_pheromone[i, j] 
     return pheromone_matrix
 
-def aco(seed=123, max_iter=5e3, num_ants=20, rho=0.1, alpha=1., beta=0., q0=0.):
+def onlineUpdatePheromone(pheromone_matrix, ant, tau0):
+    xi = 0.1
+    for key in ant.delta_pheromone:
+        i, j = key
+        pheromone_matrix[i][j] = (1-xi) * ant.delta_pheromone[i, j] + xi * tau0
+    return pheromone_matrix
+
+def aco(seed=123, max_iter=5e3, num_ants=20, rho=0.1, alpha=1., beta=0., q0=0., tau0=1., elitist=False, online=False):
     heuristic_matrix = trailHeuristic(distance_matrix, flow_matrix)
-    print heuristic_matrix
-    colony, pheromone_matrix = initializeQAP(num_ants, seed)
+    #print heuristic_matrix
+    colony, pheromone_matrix = initializeQAP(num_ants, tau0, seed)
     best_ant = copy.copy(colony[0])
     best_history = []
     iter = 0
+    #fw = open('res.txt', 'w')
     while (iter < max_iter and best_ant.fval > 1285):
         iter += 1
 #         for ant in colony:
@@ -157,24 +162,49 @@ def aco(seed=123, max_iter=5e3, num_ants=20, rho=0.1, alpha=1., beta=0., q0=0.):
             best_ant = copy.copy(colony[0])
             #ant.delta_pheromone = ant.get_delta_pheromone(ant.sol, ant.fval)
         pheromone_matrix = (1 - rho) * pheromone_matrix
-        #for ant in colony:
-        #    pheromone_matrix = updatePheromoneByAnt(pheromone_matrix, ant, rho)
-        pheromone_matrix = updatePheromoneByAnt(pheromone_matrix, best_ant, rho)
+#         for ant in colony:
+#             pheromone_matrix = updatePheromoneByAnt(pheromone_matrix, ant)
+        if elitist:
+            pheromone_matrix = updatePheromoneByAnt(pheromone_matrix, best_ant)
 #         print '############################ iter = %d ##############################'%iter
 #         print pheromone_matrix
         colony = []
         for i in range(num_ants):
             ant = renew_ant(pheromone_matrix, heuristic_matrix, alpha, beta, q0)
             colony.append(ant)
+            if online:
+                pheromone_matrix = onlineUpdatePheromone(pheromone_matrix, ant, tau0)
         colony.sort(key = lambda ant: ant.fval)     # sort the ants by their cost from lowest to highest
         #print [(ant.sol, ant.fval) for ant in colony]
-        print colony[0].sol, colony[0].fval
+        #fw.write(str(iter) + ': ' + str(colony[0].sol)+ ' ' + str(colony[0].fval) + '\n')
         best_history.append(best_ant.fval)
+    #fw.close()
     return best_ant, best_history
 
+def main():
+#     best_ant, best_history = aco(seed=0, max_iter=5e2, num_ants=100, rho=0.01, alpha=1., beta=0.8, q0=0., tau0=1., elitist=True, online=False)
+#     print best_history
+
+    np.random.seed(123)
+    ten_seeds = np.random.randint(0, 1e3, size=10)
+    results = []
+    for seed in ten_seeds:
+        t0 = time.time()
+        best_ant, best_history = aco(seed=seed, max_iter=5e2, num_ants=100, rho=0.02, alpha=1., beta=0.8, q0=0.2, tau0=1e2, elitist=True, online=False)
+        results.append([best_ant, best_history])
+        print best_history
+        print time.time()-t0
+ 
+    colors = matplotlib.cm.rainbow(np.linspace(0, 1, 10))
+    historyList = [res[-1] for res in results]
+    m = max([len(h) for h in historyList])
+#     for h in historyList:
+#         if len(h) < m:
+#             h = np.append(h, np.ones(m - len(h))*1285)
+    for i in range(len(historyList)):
+        plt.plot(np.arange(len(historyList[i])), historyList[i], c=colors[i])
+    plt.ylim([1285, 1600])
+    plt.show()  
+
 if __name__ == '__main__':
-    #colony, pheromone_matrix = initializeQAP(10, 0)
-    #print [colony[i].fval for i in range(len(colony))]
-    #print pheromone_matrix
-    best_ant, best_history = aco(seed=123, max_iter=1e3, num_ants=100, rho=0.02, alpha=1., beta=0., q0=0.2)
-    print best_history
+    main()

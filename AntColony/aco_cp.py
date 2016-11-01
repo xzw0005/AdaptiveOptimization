@@ -147,5 +147,5 @@ def run(seed=0, max_iter=5e3, popsize=20, rho=0.1, alpha=1., beta=0., q0=0.):
     return best, best_history
 
 if __name__ == '__main__':
-    best, best_history = run(seed=0, max_iter=1500, popsize=100, rho=0.02, alpha=1., beta=1., q0=0.5)
+    best, best_history = run(seed=0, max_iter=500, popsize=100, rho=0.02, alpha=1., beta=.8, q0=0.2)
     print best_history
