@@ -7,56 +7,56 @@ import time
 import matplotlib
 import matplotlib.pyplot as plt
 
-fd = open('distance_matrix.txt', 'r')
+fd = open('distMat.txt', 'r')
 line = fd.readline()
-distance_matrix = []
+distMat = []
 while (line):
     ll = line.rstrip().split()
     dists_row = [int(d) for d in ll]
-    distance_matrix.append(dists_row)
+    distMat.append(dists_row)
     line = fd.readline()
 fd.close()
-distance_matrix = np.array(distance_matrix)
-#print distance_matrix.shape
+distMat = np.array(distMat)
+#print distMat.shape
 
-ff = open('flow_matrix.txt', 'r')
+ff = open('flowMat.txt', 'r')
 line = ff.readline()
-flow_matrix = []
+flowMat = []
 while (line):
     ll = line.rstrip().split()
     flows_row = [int(flow) for flow in ll]
-    flow_matrix.append(flows_row)
+    flowMat.append(flows_row)
     line = ff.readline()
 ff.close()
-flow_matrix = np.array(flow_matrix)
-N = len(flow_matrix)
-#print flow_matrix.shape
+flowMat = np.array(flowMat)
+N = len(flowMat)
+#print flowMat.shape
 
-def costBetweenTwoDepartments(x, i, j):
+def between_cost(x, i, j):
     ''' i, j are location indices '''
     #if (i < j):
     #    temp = i; i = j; j = temp;
-    distance = distance_matrix[i, j]
+    distance = distMat[i, j]
     dept1 = x[i]
     dept2 = x[j]
-    flow = flow_matrix[dept1, dept2]
+    flow = flowMat[dept1, dept2]
     return flow * distance
 
-def computeTotalCost(x):
+def total_cost(x):
     #assert x is np.ndarray
     totalCost = 0
     for loc1 in np.arange(1, N):
         for loc2 in np.arange(loc1):
-            totalCost = totalCost + costBetweenTwoDepartments(x, loc1, loc2)
+            totalCost = totalCost + between_cost(x, loc1, loc2)
     return totalCost
 
-def compute_delta(flow_matrix, distance_matrix, x, i, j):
-    d = (flow_matrix[i][i] - flow_matrix[j][j]) * (distance_matrix[x[j]][x[j]] - distance_matrix[x[i]][x[i]]) \
-            + (flow_matrix[i][j] - flow_matrix[j][i] ) * (distance_matrix[x[j]][x[i]] - distance_matrix[x[i]][x[j]])
+def compute_delta(flowMat, distMat, x, i, j):
+    d = (flowMat[i][i] - flowMat[j][j]) * (distMat[x[j]][x[j]] - distMat[x[i]][x[i]]) \
+            + (flowMat[i][j] - flowMat[j][i] ) * (distMat[x[j]][x[i]] - distMat[x[i]][x[j]])
     for k in range(N):
         if (k != i and k != j):
-            d += (flow_matrix[k][i] - flow_matrix[k][j]) * (distance_matrix[x[k]][x[j]] - distance_matrix[x[k]][x[i]]) \
-                    + (flow_matrix[i][k] - flow_matrix[j][k] ) * (distance_matrix[x[j]][x[k]] - distance_matrix[x[i]][x[k]])
+            d += (flowMat[k][i] - flowMat[k][j]) * (distMat[x[k]][x[j]] - distMat[x[k]][x[i]]) \
+                    + (flowMat[i][k] - flowMat[j][k] ) * (distMat[x[j]][x[k]] - distMat[x[i]][x[k]])
     return d
 
 def getNeighbors(x, subset):
@@ -67,7 +67,7 @@ def getNeighbors(x, subset):
             temp = nb[i]
             nb[i] = nb[j]
             nb[j] = temp
-            neighbors.append([ [i, j], nb, computeTotalCost(nb)])
+            neighbors.append([ [i, j], nb, total_cost(nb)])
     if (subset < 1.):
         total_nbs = len(neighbors)  # N*(N-1)/2 
         num_nbs = int(total_nbs * subset)
@@ -86,7 +86,7 @@ def dynamicTabuSize(iter, maxlen, tb_lo, tb_hi):
     
 def tabuSearch(current_sol, tabu_len = 8, maxiter=1e3, aspiration=False, subset=1.0, restart=False):
     best_sol = np.copy(current_sol)
-    best_val = computeTotalCost(best_sol)
+    best_val = total_cost(best_sol)
     best_history = [best_val]
     tabuList = []
     iter = 0
@@ -144,7 +144,7 @@ def main():
     xs = []
     for i in range(len(ten_seeds)):
         np.random.seed(ten_seeds[i])
-        x = np.random.permutation(len(flow_matrix))
+        x = np.random.permutation(len(flowMat))
         xs.append(x)
     xs = np.array(xs)
     results = []
@@ -161,16 +161,16 @@ def main():
     print [res[:-1] for res in results]
     #print tabuSearch(xs[1], tabu_len=8, maxiter=1e3, aspiration=True, subset=1., restart=False)
     
-    colors = matplotlib.cm.rainbow(np.linspace(0, 1, 10))
-    historyList = [res[-1] for res in results]
-    m = max([len(h) for h in historyList])
-#     for h in historyList:
-#         if len(h) < m:
-#             h = np.append(h, np.ones(m - len(h))*1285)
-    for i in range(len(historyList)):
-        plt.plot(np.arange(len(historyList[i])), historyList[i], c=colors[i])
-    plt.ylim([1285, 1350])
-    plt.show()  
+#     colors = matplotlib.cm.rainbow(np.linspace(0, 1, 10))
+#     historyList = [res[-1] for res in results]
+#     m = max([len(h) for h in historyList])
+# #     for h in historyList:
+# #         if len(h) < m:
+# #             h = np.append(h, np.ones(m - len(h))*1285)
+#     for i in range(len(historyList)):
+#         plt.plot(np.arange(len(historyList[i])), historyList[i], c=colors[i])
+#     plt.ylim([1285, 1350])
+#     plt.show()  
     
     
 if __name__ == '__main__':

@@ -46,7 +46,7 @@ class QAP15(object):
         ''' i, j are location indices '''
         return abs(j % 5 - i % 5) + abs(j / 5 - i / 5)
 
-    def costBetweenTwoDepartments(self, X, i, j):
+    def between_cost(self, X, i, j):
         ''' i, j are location indices '''
         #if (i < j):
         #    temp = i; i = j; j = temp;
@@ -58,12 +58,12 @@ class QAP15(object):
         flow = QAP15.FLOW_MATRIX[dept1, dept2]
         return flow * distance
     
-    def computeTotalCost(self, X):
+    def total_cost(self, X):
         #assert X is np.ndarray
         totalCost = 0
         for loc1 in np.arange(1, len(QAP15.FLOW_MATRIX)):
             for loc2 in np.arange(loc1):
-                totalCost = totalCost + self.costBetweenTwoDepartments(X, loc1, loc2)
+                totalCost = totalCost + self.between_cost(X, loc1, loc2)
         return totalCost
         
     def moveOperator(self, X):
@@ -79,7 +79,7 @@ class QAP15(object):
     
     def simulatedAnnealing(self):
         xOld = self.X0
-        costOld = self.computeTotalCost(xOld)
+        costOld = self.total_cost(xOld)
         print "Initial Solution: ", xOld+1
         print "Initial Total Cost: ", costOld
         temperature = self.T0
@@ -89,7 +89,7 @@ class QAP15(object):
             for i in range(self.n - 1):
                 xNew = self.moveOperator(xOld)
                 #print xNew
-                costNew = self.computeTotalCost(xNew)
+                costNew = self.total_cost(xNew)
                 deltaCost = costNew - costOld
                 if (deltaCost <= 0):
                     timesWithoutImprovement = 0
@@ -126,7 +126,7 @@ for Tf_i in TfList:
             startTime = time.clock()
             res = solveQAP.simulatedAnnealing()  
             print "Best Result Found: ", res+1
-            print "Minimum Total Cost Found: ", solveQAP.computeTotalCost(res)
+            print "Minimum Total Cost Found: ", solveQAP.total_cost(res)
             endTime = time.clock()
             print "Elapsed Time: ", endTime - startTime            
 #f.close()

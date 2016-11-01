@@ -28,7 +28,7 @@ class Individual(object):
         '''
         if (chromosome is not None):
             self.chromosome = chromosome
-            self.cost = self.computeTotalCost(chromosome)
+            self.cost = self.total_cost(chromosome)
             self.fitness = self.getFitness(self.cost)
         else:
             self.chromosome = None
@@ -39,14 +39,14 @@ class Individual(object):
         if seed is not None:
             np.random.seed(seed)
         self.chromosome = np.random.permutation(Individual.N)
-        self.cost = self.computeTotalCost(self.chromosome)
+        self.cost = self.total_cost(self.chromosome)
         self.fitness = self.getFitness(self.cost)
 
     def computeDistance(self, i, j):
         ''' i, j are location indices '''
         return abs(j % 5 - i % 5) + abs(j / 5 - i / 5)
 
-    def costBetweenTwoDepartments(self, X, i, j):
+    def between_cost(self, X, i, j):
         ''' i, j are location indices '''
         distance = self.computeDistance(i, j)
         dept1 = X[i]
@@ -56,12 +56,12 @@ class Individual(object):
         flow = Individual.FLOW_MATRIX[dept1, dept2]
         return flow * distance
     
-    def computeTotalCost(self, X):
+    def total_cost(self, X):
         #assert X is np.ndarray
         totalCost = 0
         for loc1 in np.arange(1, Individual.N):
             for loc2 in np.arange(loc1):
-                totalCost = totalCost + self.costBetweenTwoDepartments(X, loc1, loc2)
+                totalCost = totalCost + self.between_cost(X, loc1, loc2)
         return totalCost
         
     def getFitness(self, cost):
